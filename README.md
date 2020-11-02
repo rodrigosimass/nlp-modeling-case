@@ -6,7 +6,7 @@
 ## Description
 
 The task is to use a version of the Twitter sentiment dataset (You can download dataset through the link: [The dataset](https://drive.google.com/file/d/13mAaFqCrscUYkoITf4rZ6qG9ptAlIJVb/view?usp=sharing)) and create a simple but complete preprocessing, training and validation pipeline to predict the target *is_optimistic*. 
-Further, you're tasked to compare your results with those of a pre-trained Zero-shot approach such as Bart.
+Further, you're tasked to compare your results with those of a pre-trained Zero-shot approach such as Bart [Bart info](https://huggingface.co/transformers/model_doc/bart.html).
 
 
 The repository contains a small version of the dataset (20K examples) with an added column "bart_is_optimistic" which is the output of the Bart-model (for a query "this text is" [optimistic]). An example of how this is done is included in the notebook 'bart-example.ipynb'. You are free to base your whole training and analysis on this small version of the dataset if you have no access to a GPU (the inference with Bart is slow on CPU). 
@@ -35,7 +35,7 @@ One part of the coding task is to predict the target using a supervised method (
 ## Finally
 
 If time is short or you get stuck, do as much as you can, and be prepare to explain the steps you omitted. 
-This is an open-ended case, and you are encorage to solve it the way you think is suitable. Some statements are vague (such as "compare" the models), and in those cases you're free to make your own interpretations and assumtions. 
+This is an open-ended case, and you are encoraged to solve it the way you think is suitable. Some statements are vague (such as "compare" the models), and in those cases you're free to make your own interpretations and assumtions. 
 
 
 ![Huggingface](huggingface.png)
