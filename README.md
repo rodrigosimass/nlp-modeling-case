@@ -1,11 +1,11 @@
 
-![Twitter](twitter.png)
+![Twitter](twitter.jpg)
 
 # NLP modeling case
 
 ## Description
 
-The task is to use a version of the Twitter sentiment dataset (You can download dataset through the link: [The dataset](https://drive.google.com/file/d/1DnClwbF4OUPS_DCJHJqWmJsNARS8Rfkl/view?usp=sharing)) and create a simple but complete preprocessing, training and validation pipeline to predict the target *is_optimistic*. 
+The task is to use a version of the Twitter sentiment dataset (You can download dataset through the link: [The dataset](https://drive.google.com/file/d/13mAaFqCrscUYkoITf4rZ6qG9ptAlIJVb/view?usp=sharing)) and create a simple but complete preprocessing, training and validation pipeline to predict the target *is_optimistic*. 
 Further, you're encouraged to compare your results with those of a pre-trained Zero-shot approach such as Bart.
 
 
@@ -17,7 +17,6 @@ One part of the coding task is to predict the target using a supervised method (
 
 
 ## Tasks
-
 
 1. Read the paper [BART: Denoising Sequence-to-Sequence Pre-training for Natural Language Generation, Translation, and Comprehension](https://arxiv.org/abs/1910.13461) and get a high-level understanding of the architecture, how the dataset was created and how the data was encoded. Be prepared to discuss it briefly during the interview.
 
