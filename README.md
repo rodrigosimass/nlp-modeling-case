@@ -1,5 +1,5 @@
 
-![Twitter](twitter.jpg)
+![Twitter](img/twitter.jpg)
 
 # NLP modeling case
 
@@ -38,4 +38,4 @@ If time is short or you get stuck, do as much as you can, and be prepare to expl
 This is an open-ended case, and you are encoraged to solve it the way you think is suitable. Some statements are vague (such as "compare" the models), and in those cases you're free to make your own interpretations and assumtions. 
 
 
-![Huggingface](huggingface.png)
+![Huggingface](img/huggingface.png)
