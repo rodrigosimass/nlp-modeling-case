@@ -87,6 +87,7 @@ if USE_WANDB:
 n_total_steps = len(train_loader)
 
 for epoch in range(num_epochs):
+    trn_loss = 0
     for i, (messages, labels) in enumerate(train_loader):
         messages = messages.to(device)
         labels = labels.to(device)
@@ -94,11 +95,13 @@ for epoch in range(num_epochs):
         # Forward pass
         outputs = model(messages)
         loss = criterion(outputs, labels)
+        trn_loss += loss.item()
 
         # Backward and optimize
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+    trn_loss /= len(train_loader)
 
     with torch.no_grad():
         val_loss = 0
@@ -123,11 +126,11 @@ for epoch in range(num_epochs):
                 break
     if epoch % 1 == 0:
         print(
-            f"Epoch [{epoch+1}/{num_epochs}], trn_Loss: {loss.item():.4f}, val_Loss: {val_loss:.4f}"
+            f"Epoch [{epoch+1}/{num_epochs}], trn_Loss: {trn_loss:.4f}, val_Loss: {val_loss:.4f}"
         )
     if USE_WANDB:
         log_dict = {
-            "train_loss": loss.item(),
+            "train_loss": trn_loss,
             "val_loss": val_loss,
         }
         wandb.log(log_dict, step=epoch + 1)
