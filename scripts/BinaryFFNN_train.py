@@ -25,10 +25,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 input_size = 512
-hidden_size = 20
+hidden_size = 100
 num_classes = 1
 num_epochs = 50
-batch_size = 8
+batch_size = 4
 learning_rate = 0.01
 
 # Load datasets of tokenized text
@@ -74,14 +74,15 @@ if USE_WANDB:
         },
     )
     name = "TRIAL_" if TRIAL_RUN else ""
-    name += f"FFNN_{hidden_size}"
+    name += f"FFNN_dropout{hidden_size}"
     wandb.run.name = name
 
 # Early Stopping params
 best_val_loss = float("inf")
 patience = 3
 counter = 0
-PATH = f"models/{wandb.run.id}.pth"  # store model with name equal to wandb id
+if USE_WANDB:
+    PATH = f"models/{wandb.run.name}.pth"  # store model with name equal to wandb id
 # Train the model
 n_total_steps = len(train_loader)
 
@@ -113,7 +114,8 @@ for epoch in range(num_epochs):
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             counter = 0
-            torch.save(model.state_dict(), PATH)
+            if USE_WANDB:
+                torch.save(model.state_dict(), PATH)
         else:
             counter += 1
             if counter >= patience:
