@@ -25,10 +25,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 input_size = 512
-hidden_size = 100
+hidden_size = 30
 num_classes = 1
 num_epochs = 50
-batch_size = 4
+batch_size = 16
 learning_rate = 0.01
 
 # Load datasets of tokenized text

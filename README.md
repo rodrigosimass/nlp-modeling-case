@@ -15,7 +15,7 @@ The most important technologies and ML techniques used in this use-case include:
 - Using __pandas__ and __ProfileReports__ for data exploration.
 - Using __Pytorch__ Datasets together with a Tensorflow Universal sentence encoder to preprocess the raw data into NN-suitable tensors.
 - Using __Weights and Biases__: a web-based dashboard to monitor the training of Deep Leaning models and tracking of experiments.
-- The usage of a __validation set__ and __early stopping_Regularization techniques such as a __Dropout__ layer to prevent over-fitting.
+- The usage of a __validation set__ and __early stopping__ Regularization techniques such as a __Dropout__ layer to prevent over-fitting.
 
 ## How to navigate the repo and run code
 - __Pytorch__ code can be found under the directory scripts:
@@ -32,10 +32,10 @@ I had many more ideas to try out for this use case, but did not have time to do 
 - Improve the training loop by employing k-folds cross validation.
 - Move on to more advanced architectures that leverage the 1d spacial relation of tokens, such as 1d Convolutional NNs, or Recurrent NNs.
 
+# NLP modeling case
 
 ![Twitter](img/twitter.jpg)
 
-# NLP modeling case
 
 ## Description
 
