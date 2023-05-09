@@ -13,4 +13,4 @@
 [x] Store models 
 
 ## Extra mile
-[ ] Instead of using solely the message, we can use the other fields such as username/id or date (extract features such as weekday, month, time of day) in our classifier.
+[ ] Instead of using solely the message in the dataset, we can use the other fields such as username/id or date (extract features such as weekday, month, time of day) in our classifier.

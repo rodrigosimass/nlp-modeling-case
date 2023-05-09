@@ -3,6 +3,12 @@
 In this project, I had one day to develop an NN model to perform binary classification of text (Twitter posts), categorizing them as either having a positive or negative sentiment. Additionally, I was tasked with comparing my resulting solution with the pre-trained Zero-shot BART model (as demonstrated in bart-example.ipynb). Given the time constraints and the lack of access to GPUs, I decided to implement a simple Feed Forward Neural Network using PyTorch and train/validate it using the small dataset available in the repository.
 Although I did not have enough time to attain the highest possible accuracy through fine-tuning or the usage of compute-heavy architectures, my simple solution achieved a classification accuracy of around 80%, thus outperforming the BART baseline which had an accuracy of 70%.
 
+# Architecture
+
+The solution is a Feed Forward Network with 1 fully-connected layer and a ReLU activation, a drop-out layer for regularization, followed by a final fully connected layer and a sigmoid activation function to a single neuron that predicts the binary class of the sample.
+
+The BCE Loss function was used and both the Adam and SGD Optimizer were experimented with.
+
 ## Technology and methodology
 The most important technologies and ML techniques used in this use-case include:
 
@@ -21,6 +27,10 @@ The most important technologies and ML techniques used in this use-case include:
 - __models__ directory stores the trained models.
 
 ## What I would have done If I had more time
+I had many more ideas to try out for this use case, but did not have time to do so given the time constraint. I would be happy to discuss them later during the interview but a few ideas that remain on my TODO list include:
+- Perform some feature extraction on the original dataset such as: month, weekday, time of day of the tweet, or even userid (as it might be indicative of user age) to add more features to the classifier.
+- Improve the training loop by employing k-folds cross validation.
+- Move on to more advanced architectures that leverage the 1d spacial relation of tokens, such as 1d Convolutional NNs, or Recurrent NNs.
 
 
 ![Twitter](img/twitter.jpg)
