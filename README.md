@@ -1,7 +1,7 @@
 # Solution Description
 
 In this project, I had one day to develop an NN model to perform binary classification of text (Twitter posts), categorizing them as either having a positive or negative sentiment. Additionally, I was tasked with comparing my resulting solution with the pre-trained Zero-shot BART model (as demonstrated in bart-example.ipynb). Given the time constraints and the lack of access to GPUs, I decided to implement a simple Feed Forward Neural Network using PyTorch and train/validate it using the small dataset available in the repository.
-Although I did not have enough time to attain the highest possible accuracy through fine-tuning or the usage of compute-heavy architectures, my simple solution achieved a classification accuracy of around 80%, thus outperforming the BART baseline which had an accuracy of 70%.
+Although I did not have enough time to attain the highest possible accuracy through fine-tuning or the usage of compute-heavy architectures, my simple solution achieved a classification accuracy of around 77%, thus outperforming the BART baseline which had an accuracy of 70%. The train and validation curves suggested that the model is underfitting the data and thus a scale-up of the model and the dataset would certainly improve performance further.
 
 # Architecture
 
