@@ -3,3 +3,4 @@
 *.pyc
 data/reports/*
 data/raw/twitter_dataset_full.csv
+wandb/*

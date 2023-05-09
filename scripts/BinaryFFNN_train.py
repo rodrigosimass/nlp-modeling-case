@@ -2,52 +2,56 @@ import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-import wandb
-
 import sys
-
-sys.path.append("models")
+import wandb
+import torch.utils.data as data
 
 from TwitterDataset import (
     TwitterDataset_small_train,
-    TwitterDataset_small_test,
     ToToken,
     ToTensor,
 )
 from BinaryFFNN import BinaryFFNN
 
+TRIAL_RUN = False
+
+if len(sys.argv) < 2:
+    print("ERROR! \nusage: python3 MLP.py <<0/1>> for wandb on or off")
+    exit(1)
+USE_WANDB = bool(int(sys.argv[1]))
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 input_size = 512
-hidden_size = 200
+hidden_size = 20
 num_classes = 1
-num_epochs = 10
-batch_size = 32
-learning_rate = 0.001
+num_epochs = 50
+batch_size = 8
+learning_rate = 0.01
 
 # Load datasets of tokenized text
 composed = torchvision.transforms.Compose([ToToken(), ToTensor()])
 
 train_dataset = TwitterDataset_small_train(transform=composed)
 
-x = train_dataset.x
-y = train_dataset.y
+if TRIAL_RUN:
+    train_dataset = data.Subset(train_dataset, range(1500))
 
-print(x.shape)
-print(y.shape)
+train_size = int(0.8 * len(train_dataset))
+val_size = len(train_dataset) - train_size
 
-test_dataset = TwitterDataset_small_test(transform=composed)
+train_dataset, val_dataset = torch.utils.data.random_split(
+    train_dataset, [train_size, val_size]
+)
 
 train_loader = torch.utils.data.DataLoader(
     dataset=train_dataset, batch_size=batch_size, shuffle=True
 )
 
-test_loader = torch.utils.data.DataLoader(
-    dataset=test_dataset, batch_size=batch_size, shuffle=False
+val_loader = torch.utils.data.DataLoader(
+    dataset=val_dataset, batch_size=batch_size, shuffle=False
 )
 
 model = BinaryFFNN(input_size, hidden_size)
@@ -55,11 +59,34 @@ model = BinaryFFNN(input_size, hidden_size)
 criterion = nn.BCELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
+if USE_WANDB:
+    wandb.init(
+        project="nlp-use-case",
+        entity="rodrigosimass",
+        config={
+            "input_size": input_size,
+            "hidden_size": hidden_size,
+            "num_epochs": num_epochs,
+            "batch_size": batch_size,
+            "learning_rate": learning_rate,
+            "optimizer": type(optimizer),
+            "loss": type(criterion),
+        },
+    )
+    name = "TRIAL_" if TRIAL_RUN else ""
+    name += f"FFNN_{hidden_size}"
+    wandb.run.name = name
+
+# Early Stopping params
+best_val_loss = float("inf")
+patience = 3
+counter = 0
+PATH = f"models/{wandb.run.id}.pth"  # store model with name equal to wandb id
 # Train the model
 n_total_steps = len(train_loader)
+
 for epoch in range(num_epochs):
     for i, (messages, labels) in enumerate(train_loader):
-
         messages = messages.to(device)
         labels = labels.to(device)
 
@@ -72,29 +99,37 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
 
-        if (i + 1) % 500 == 0:
-            print(
-                f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.4f}"
-            )
+    with torch.no_grad():
+        val_loss = 0
+        for messages, labels in val_loader:
+            messages = messages.to(device)
+            labels = labels.to(device)
 
-print('Finished Training')
-PATH = 'models/ffnn.pth'
-torch.save(model.state_dict(), PATH)
+            outputs = model(messages)
+            val_loss += criterion(outputs, labels).item()
 
-# Test the model
-# In test phase, we don't need to compute gradients (for memory efficiency)
-with torch.no_grad():
-    n_correct = 0
-    n_samples = 0
-    for tokens, labels in test_loader:
-        tokens = tokens.to(device)
-        labels = labels.to(device)
-        outputs = model(tokens)
-        # max returns (value ,index)
-        predicted_labels = outputs.round()
-       
-        n_samples += labels.size(0)
-        n_correct += (predicted_labels == labels).sum().item()
+        val_loss /= len(val_loader)
 
-    acc = 100.0 * n_correct / n_samples
-    print(f"Accuracy of the network on the test set: {acc} %")
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            counter = 0
+            torch.save(model.state_dict(), PATH)
+        else:
+            counter += 1
+            if counter >= patience:
+                print("Early stopping.")
+                break
+    if epoch % 1 == 0:
+        print(
+            f"Epoch [{epoch+1}/{num_epochs}], trn_Loss: {loss.item():.4f}, val_Loss: {val_loss:.4f}"
+        )
+    if USE_WANDB:
+        log_dict = {
+            "train_loss": loss.item(),
+            "val_loss": val_loss,
+        }
+        wandb.log(log_dict, step=epoch + 1)
+
+
+if USE_WANDB:
+    wandb.finish()
