@@ -8,6 +8,7 @@ import torch.utils.data as data
 
 from TwitterDataset import (
     TwitterDataset_small_train,
+    TwitterDataset_small_test,
     ToToken,
     ToTensor,
 )
@@ -25,11 +26,49 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyper-parameters
 input_size = 512
-hidden_size = 30
+hidden_size1 = 20
+hidden_size2 = 5
+hidden_size3 = 10
 num_classes = 1
-num_epochs = 50
-batch_size = 16
-learning_rate = 0.01
+num_epochs = 30
+batch_size = 8
+learning_rate = 0.001
+
+num_hidden_layers = 3
+dropout = False
+
+# Early Stopping params
+patience = 3
+
+# Model creation and parameter logging
+model = BinaryFFNN(input_size, hidden_size1, hidden_size2, hidden_size3)
+
+criterion = nn.BCELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+if USE_WANDB:
+    wandb.init(
+        project="nlp-use-case",
+        entity="rodrigosimass",
+        config={
+            "input_size": input_size,
+            "hidden_size": hidden_size1,
+            "hidden_size2": hidden_size2,
+            "hidden_size3": hidden_size3,
+            "num_epochs": num_epochs,
+            "batch_size": batch_size,
+            "learning_rate": learning_rate,
+            "optimizer": type(optimizer),
+            "loss": type(criterion),
+            "num_hidden_layers": num_hidden_layers,
+            "dropout_reg": dropout,
+            "patience": patience,
+        },
+    )
+    name = "TRIAL_" if TRIAL_RUN else ""
+    name += f"FFNN_3layers_small_adam_relu"
+    name += "dropout" if dropout else ""
+    wandb.run.name = name
 
 # Load datasets of tokenized text
 composed = torchvision.transforms.Compose([ToToken(), ToTensor()])
@@ -54,39 +93,12 @@ val_loader = torch.utils.data.DataLoader(
     dataset=val_dataset, batch_size=batch_size, shuffle=False
 )
 
-model = BinaryFFNN(input_size, hidden_size)
 
-criterion = nn.BCELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-
-if USE_WANDB:
-    wandb.init(
-        project="nlp-use-case",
-        entity="rodrigosimass",
-        config={
-            "input_size": input_size,
-            "hidden_size": hidden_size,
-            "num_epochs": num_epochs,
-            "batch_size": batch_size,
-            "learning_rate": learning_rate,
-            "optimizer": type(optimizer),
-            "loss": type(criterion),
-        },
-    )
-    name = "TRIAL_" if TRIAL_RUN else ""
-    name += f"FFNN_dropout{hidden_size}"
-    wandb.run.name = name
-
-# Early Stopping params
-best_val_loss = float("inf")
-patience = 3
-counter = 0
-if USE_WANDB:
-    PATH = f"models/{wandb.run.name}.pth"  # store model with name equal to wandb id
 # Train the model
-n_total_steps = len(train_loader)
-
+best_val_loss = float("inf")
+counter = 0
 for epoch in range(num_epochs):
+    model.train()
     trn_loss = 0
     for i, (messages, labels) in enumerate(train_loader):
         messages = messages.to(device)
@@ -104,6 +116,7 @@ for epoch in range(num_epochs):
     trn_loss /= len(train_loader)
 
     with torch.no_grad():
+        model.eval()
         val_loss = 0
         for messages, labels in val_loader:
             messages = messages.to(device)
@@ -118,6 +131,7 @@ for epoch in range(num_epochs):
             best_val_loss = val_loss
             counter = 0
             if USE_WANDB:
+                PATH = f"models/{wandb.run.name}.pth"  # store model with name equal to wandb run name
                 torch.save(model.state_dict(), PATH)
         else:
             counter += 1
@@ -135,6 +149,26 @@ for epoch in range(num_epochs):
         }
         wandb.log(log_dict, step=epoch + 1)
 
+test_dataset = TwitterDataset_small_test(transform=composed)
+
+test_loader = torch.utils.data.DataLoader(
+    dataset=test_dataset, batch_size=test_dataset.n_samples
+)
+
+with torch.no_grad():
+    n_samples = 0
+    n_correct = 0
+    model.eval()
+    for tokens, labels in test_loader:  # single batch
+        outputs = model(tokens)
+
+        predicted_labels = outputs.round()
+
+        n_samples += labels.size(0)
+        n_correct += (predicted_labels == labels).sum().item()
+
+        acc = 100.0 * n_correct / n_samples
+        print(f"Accuracy of the network on the test set: {acc} %")
 
 if USE_WANDB:
     wandb.finish()
