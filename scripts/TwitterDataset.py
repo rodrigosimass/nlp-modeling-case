@@ -100,6 +100,8 @@ if __name__ == "__main__":
     print(features.shape, label.shape)
     print(dataset_train.n_samples)
 
+    print(dataset_train[0:10][1].max(), dataset_train[0:10][1].min())
+
     dataset_test = TwitterDataset_small_test(transform=composed)
 
     first_data = dataset_test[0]
